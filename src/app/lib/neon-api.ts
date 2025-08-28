@@ -9,10 +9,10 @@ interface NeonProject {
   updated_at: string;
 }
 
-interface NeonApiResponse<T> {
-  data?: T;
-  error?: string;
-}
+// interface NeonApiResponse<T> {
+//   data?: T;
+//   error?: string;
+// }
 
 class NeonApiClient {
   private apiKey: string;

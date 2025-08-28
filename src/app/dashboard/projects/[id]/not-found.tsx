@@ -8,7 +8,7 @@ export default function NotFound() {
       <div className="text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Project Not Found</h1>
         <p className="text-gray-600 mb-6">
-          The project you're looking for doesn't exist or you don't have access to it.
+          The project you are looking for does not exist or you don not have access to it.
         </p>
         <Link
           href="/dashboard"

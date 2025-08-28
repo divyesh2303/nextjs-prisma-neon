@@ -97,6 +97,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
               onClick={handleView}
               className="px-3 py-1 text-sm border rounded hover:bg-gray-100"
             >
+              <Eye />
               Open
             </button>
             <button

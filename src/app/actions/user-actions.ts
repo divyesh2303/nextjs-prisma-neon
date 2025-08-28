@@ -4,7 +4,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/app/lib/prisma';
 import { getProjectPrismaClient } from '@/app/lib/prisma';
-import type { User, CreateUserRequest } from '@/types';
+import type { User } from '@/types';
 
 // Get users for a project
 export async function getUsers(projectId: number): Promise<User[]> {
