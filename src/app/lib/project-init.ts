@@ -1,6 +1,5 @@
 // lib/project-init.ts
 import { execSync } from "child_process";
-// import { testDatabaseConnection } from './neon';
 
 export async function initializeProjectDatabase(
   databaseUrl: string
@@ -32,7 +31,7 @@ export async function initializeProjectDatabase(
     console.error("❌ Failed to initialize project database:", error);
   } finally {
     console.error(
-      "Miration performed for creating the USER table in DB of newly created Neon Project"
+      "Migration performed for creating the USER table in DB of newly created Neon Project"
     );
   }
 }
