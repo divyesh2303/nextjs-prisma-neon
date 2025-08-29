@@ -16,7 +16,12 @@
 
 3. **Set up environment variables**
    ```bash
-   cp .env.example .env.local
+   mkdir .env
+   ```
+   
+   Download npm
+   ```bash
+   npm install
    ```
    
    Fill in your environment variables:
@@ -35,10 +40,10 @@
 
    ```
 
-4. **Set up the database**
+3. **Set up the database**
    ```bash
    npx prisma generate
-   npx prisma db push
+   npx prisma generate --schema=prisma-project/projectSchema.prisma
    ```
 
 ## 🛠️ Tech Stack
@@ -57,9 +62,8 @@
 
 ### Projects
 - `GET /api/projects` - List all projects
-- `POST /api/projects` - Create a new project
-- `GET /api/projects/[id]` - Get project details
+- `POST /api/projects` - Create a new project 
 
 ### Users
-- `GET /api/projects/[id]/users` - List users in a project
-- `POST /api/projects/[id]/users` - Add user to a project
+- `GET /api/projects/[id]` - List users in a project
+- `POST /api/projects/[id]` - Add user to a project
