@@ -23,9 +23,16 @@
    ```env
    # Database
    DATABASE_URL="your-main-database-url"
+   PROJECT_DATABASE_URL="<do not add anything >"
    
    # Neon API (for creating project databases)
    NEON_API_KEY="your-neon-api-key"
+   NEON_ORG_ID="your-neon-ORG-id"
+    
+
+
+ 
+
    ```
 
 4. **Set up the database**
