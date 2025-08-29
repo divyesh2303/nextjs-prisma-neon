@@ -9,7 +9,8 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "generate:project": "prisma generate --schema=prisma-project/projectSchema.prisma"
   },
   "dependencies": {
     "@neondatabase/api-client": "^2.2.0",

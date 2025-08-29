@@ -1,13 +1,13 @@
 // prisma-project/projectSchema.prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("PROJECT_DATABASE_URL")
-}
-
 generator client {
   provider      = "prisma-client-js"
   output        = "../lib/prisma-project"
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PROJECT_DATABASE_URL")
 }
 
 model User {
