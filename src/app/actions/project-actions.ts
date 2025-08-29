@@ -1,8 +1,7 @@
 // lib/actions/project-actions.ts
 'use server';
 
-import { revalidatePath } from 'next/cache';
-// import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache'; 
 import { prisma } from '@/app/lib/prisma';
 import { createNeonProject } from '@/app/lib/neon';
 import { initializeProjectDatabase } from '@/app/lib/project-init';

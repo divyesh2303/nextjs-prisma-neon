@@ -13,7 +13,7 @@ export async function initializeProjectDatabase(
 
     try {
       execSync(
-        `npx prisma migrate deploy --schema=prisma-project/projectSchema.prisma`,
+        `npx prisma db push  --schema=prisma-project/projectSchema.prisma`,
         {
           stdio: "inherit",
           env: {
