@@ -14,13 +14,14 @@ import {
   getTasks,
   updateTaskStatus,
 } from "../actions/task-actions";
+import type { Status, Priority } from "@/types";
 
 type Task = {
   id: string;
   title: string;
   description?: string | null;
-  status: string;
-  priority: string;
+  status: Status;
+  priority: Priority;
   groupId: string;
   position: number;
 };
@@ -70,7 +71,7 @@ export default function TaskBoard({
       const updated = [...prev];
       const movedTask = updated.find((t) => t.id === draggableId);
       if (movedTask) {
-        movedTask.status = destination.droppableId;
+        movedTask.status = destination.droppableId as Status;
         movedTask.position = destination.index;
       }
       return [...updated];

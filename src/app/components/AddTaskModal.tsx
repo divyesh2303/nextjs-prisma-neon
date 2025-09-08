@@ -8,8 +8,8 @@ type Task = {
   id: string;
   title: string;
   description?: string | null;
-  status: string;
-  priority: string;
+  status: Status;
+  priority: Priority;
   groupId: string;
   position: number;
 };
@@ -124,7 +124,7 @@ export default function AddTaskModal({
                 <select
                   className="border p-2 rounded flex-1"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  onChange={(e) => setStatus(e.target.value as Status)}
                 >
                   <option value="TODO">To Do</option>
                   <option value="IN_PROGRESS">In Progress</option>
@@ -135,7 +135,7 @@ export default function AddTaskModal({
                 <select
                   className="border p-2 rounded flex-1"
                   value={priority}
-                  onChange={(e) => setPriority(e.target.value)}
+                  onChange={(e) => setPriority(e.target.value as Priority)}
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>

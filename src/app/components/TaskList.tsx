@@ -16,7 +16,7 @@ export default function TaskBoard({
   const [tasks, setTasks] = useState(initialTasks);
   console.log("Initial tasks:", tasks);
   console.log("Initial tasks:", initialTasks);
-  
+
   const [isPending, startTransition] = useTransition();
 
   const handleAddTask = async (formData: FormData) => {
@@ -26,14 +26,13 @@ export default function TaskBoard({
         const groupId = formData.get("groupId") as string; // make sure you have this in the form
         const description = formData.get("description") as string | undefined;
 
-        const newTask = await createTask(
-          projectId,
+        const newTask = await createTask(projectId, {
           title,
           groupId,
-          "TODO",
-          "LOW",
-          description
-        );
+          status: "TODO",
+          priority: "LOW",
+          description,
+        });
 
         setTasks((prev) => [newTask, ...prev]);
       } catch (error) {
