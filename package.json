@@ -4,12 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "postinstall": "prisma generate",
+    "postinstall": "prisma generate && prisma generate --schema=prisma-project/projectSchema.prisma",
     "generate:project": "prisma generate --schema=prisma-project/projectSchema.prisma"
   },
   "dependencies": {
@@ -44,7 +44,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
-    "prisma": "^6.14.0",
+    "prisma": "^6.15.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
