@@ -41,14 +41,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
- 
-# Prisma generated client (custom output)
+# Prisma generated clients (custom outputs)
 lib/prisma-master/
 !lib/prisma-master/package.json
-
+lib/prisma-project/
+!lib/prisma-project/package.json
 
 # cache or temp files
 *.log
 *.tmp
 .cache/
-

@@ -4,12 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma generate --schema=prisma-project/projectSchema.prisma && next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:generate": "prisma generate",
-    "postinstall": "prisma generate && prisma generate --schema=prisma-project/projectSchema.prisma",
+    "db:generate": "prisma generate && prisma generate --schema=prisma-project/projectSchema.prisma",
     "generate:project": "prisma generate --schema=prisma-project/projectSchema.prisma"
   },
   "dependencies": {
