@@ -48,3 +48,7 @@ next-env.d.ts
 *.log
 *.tmp
 .cache/
+
+# Prisma generated client (custom output)
+lib/prisma-master/
+!lib/prisma-master/package.json
