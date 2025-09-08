@@ -1,6 +1,6 @@
 // app/actions/group-actions.ts
 "use server";
- 
+
 import { getProjectPrismaClient } from "@/app/lib/prisma";
 import { prismaMaster } from "@/app/lib/prisma";
 
@@ -8,6 +8,7 @@ type GroupLite = {
   id: string;
   name: string;
   createdAt: Date;
+  
 };
 
 // Get groups for a project
@@ -60,7 +61,6 @@ export async function createGroup(
       data: { name: name.trim() },
     });
 
-    // revalidatePath(`/dashboard/projects/${projectId}`);
     return { success: true, group };
   } catch (error) {
     console.error("Failed to create group:", error);
@@ -71,7 +71,7 @@ export async function createGroup(
 // Update an existing group
 export async function updateGroup(
   projectId: number,
-  groupId: number,
+  groupId: string,
   formData: FormData
 ): Promise<{ success: boolean; error?: string; group?: GroupLite }> {
   try {
@@ -101,7 +101,7 @@ export async function updateGroup(
 // Delete a group
 export async function deleteGroup(
   projectId: number,
-  groupId: number
+  groupId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const project = await prismaMaster.project.findUnique({

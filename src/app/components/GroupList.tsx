@@ -1,4 +1,4 @@
-// app/components/UserList.tsx
+// src/app/components/GroupList.tsx
 "use client";
 
 import React, { useState, useTransition, useOptimistic } from "react";
@@ -7,20 +7,19 @@ import {
   createGroup,
   updateGroup,
   deleteGroup,
-} from "@/app/actions/group-actions"; // ✅ updated path after folder rename
+} from "@/app/actions/group-actions";
 import type { Group } from "@/types";
 import ClientDate from "./ClientDate";
 
 interface UserListProps {
   projectId: number;
   initialUsers: Group[];
-  onSelectGroup?: (groupId: number) => void; // 👈 new
+  onSelectGroup?: (groupId: string) => void;
 }
-
 type OptimisticAction =
   | { type: "add"; group: Group }
-  | { type: "update"; groupId: number; group: Partial<Group> }
-  | { type: "delete"; groupId: number };
+  | { type: "update"; groupId: string; group: Partial<Group> }
+  | { type: "delete"; groupId: string };
 
 export const UserList = ({
   projectId,
@@ -59,7 +58,7 @@ export const UserList = ({
     }
 
     const optimisticGroup: Group = {
-      id: Date.now(), // temporary
+      id: Date.now().toString(),
       name: name.trim(),
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -79,7 +78,7 @@ export const UserList = ({
     }
   };
 
-  const handleUpdateUser = async (groupId: number, formData: FormData) => {
+  const handleUpdateUser = async (groupId: string, formData: FormData) => {
     const name = formData.get("name") as string;
 
     if (!name?.trim()) {
@@ -105,14 +104,14 @@ export const UserList = ({
     }
   };
 
-  const handleDeleteUser = async (groupId: number) => {
+  const handleDeleteUser = async (groupId: string) => {
     if (!confirm("Are you sure you want to delete this group?")) return;
 
     startTransition(() => {
       addOptimisticUser({ type: "delete", groupId });
     });
 
-    const result = await deleteGroup(projectId, groupId);
+    const result = await deleteGroup(projectId, String(groupId));
     if (!result.success) {
       setError(result.error || "Failed to delete group");
     }
@@ -193,7 +192,7 @@ export const UserList = ({
           optimisticUsers.map((group) => (
             <div
               key={group.id}
-              onClick={() => onSelectGroup?.(group.id)}  
+              onClick={() => onSelectGroup?.(group.id)}
               className={`p-4 bg-gray-50 rounded-lg border flex items-center justify-between cursor-pointer hover:bg-blue-50 ${
                 editingUser?.id === group.id ? "ring-2 ring-blue-400" : ""
               }`}

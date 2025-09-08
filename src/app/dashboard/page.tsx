@@ -3,19 +3,19 @@
 
 import { useEffect, useState } from "react";
 import NewProjectForm from "../components/NewProjectForm";
-import { UserList } from "../components/UserList";
+import { UserList } from "../components/GroupList";
 import { getProjects } from "../actions/project-actions";
 import { getGroups } from "../actions/group-actions";
-import type { Project } from "@/types";
+import type { Group, Project } from "@/types";
 import ChatBotWidget from "../components/ChatBotWidget";
 import TaskBoard from "../components/TaskBoard";
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  
+
   const [groups, setGroups] = useState<Group[]>([]);
- 
+
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
 
   // Load projects
@@ -27,12 +27,17 @@ export default function DashboardPage() {
     fetchProjects();
   }, []);
 
-  // Load groups (users) when project changes
   useEffect(() => {
     if (!selectedProject) return;
     async function fetchGroups() {
+      if (!selectedProject) return;
       const data = await getGroups(selectedProject.id);
-      setGroups(data);
+
+      const fullGroups: Group[] = data.map((g) => ({
+        ...g,
+        updatedAt: g.createdAt,
+      }));
+      setGroups(fullGroups);
     }
     fetchGroups();
   }, [selectedProject]);
@@ -71,7 +76,7 @@ export default function DashboardPage() {
               Groups in {selectedProject.name}
             </h3>
             <UserList
-              projectId={selectedProject.id}
+              projectId={selectedProject.id ?? 0}
               initialUsers={groups}
               onSelectGroup={setActiveGroup}
             />
@@ -89,8 +94,8 @@ export default function DashboardPage() {
       </main>
       {activeGroup && selectedProject && (
         <ChatBotWidget
-          activeGroup={activeGroup}  
-          projectId={selectedProject.id}  
+          activeGroup={activeGroup}
+          projectId={selectedProject.id}
         />
       )}
     </div>
