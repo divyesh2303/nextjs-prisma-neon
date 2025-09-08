@@ -14,5 +14,6 @@ model Project {
   name          String
   databaseUrl   String
   neonProjectId String
+  pineconeIndex String?
   createdAt     DateTime @default(now())
 }

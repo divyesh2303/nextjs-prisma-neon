@@ -9,11 +9,7 @@ interface NeonProject {
   updated_at: string;
 }
 
-// interface NeonApiResponse<T> {
-//   data?: T;
-//   error?: string;
-// }
-
+ 
 class NeonApiClient {
   private apiKey: string;
 
@@ -81,9 +77,9 @@ class NeonApiClient {
     return response.projects;
   }
 
-  // Extract Neon project ID from database URL
+ 
   extractProjectIdFromUrl(databaseUrl: string): string {
-    // Extract from URL like: postgresql://user:pass@ep-cool-darkness-123456.us-east-1.aws.neon.tech/dbname
+    
     const match = databaseUrl.match(
       /ep-[a-z0-9-]+\.([a-z0-9-]+\.){2}neon\.tech/
     );
@@ -91,10 +87,9 @@ class NeonApiClient {
       throw new Error("Could not extract Neon project ID from database URL");
     }
 
-    // For more accurate extraction, you might need to store the neonProjectId separately
-    // This is a simplified approach - consider storing neonProjectId in your database
+ 
     const endpoint = match[0];
-    return endpoint.split(".")[0]; // This might not be accurate, better to store neonProjectId
+    return endpoint.split(".")[0];  
   }
 }
 

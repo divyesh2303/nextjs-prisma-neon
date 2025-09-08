@@ -1,157 +1,185 @@
-// lib/actions/project-actions.ts
-'use server';
+// app/actions/project-actions.ts
+"use server";
 
-import { revalidatePath } from 'next/cache'; 
-import { prisma } from '@/app/lib/prisma';
-import { createNeonProject } from '@/app/lib/neon';
-import { initializeProjectDatabase } from '@/app/lib/project-init';
-import { neonApiClient } from '@/app/lib/neon-api';
-import type { Project } from '@/types';
-
+import { revalidatePath } from "next/cache";
+import { prismaMaster } from "@/app/lib/prisma";
+import { createNeonProject } from "@/app/lib/neon";
+import { initializeProjectDatabase } from "@/app/lib/project-init";
+import { neonApiClient } from "@/app/lib/neon-api";
+import type { Project } from "@/types";
+import { pinecone } from "@/app/lib/pinecone";
 // Server action to get all projects
 export async function getProjects(): Promise<Project[]> {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: { createdAt: 'desc' },
+    const projects = await prismaMaster.project.findMany({
+      orderBy: { createdAt: "desc" },
     });
     return projects;
   } catch (error) {
-    console.error('Failed to fetch projects:', error);
-    throw new Error('Failed to fetch projects');
+    console.error("Failed to fetch projects:", error);
+    throw new Error("Failed to fetch projects");
   }
 }
 
 // Server action to get a single project by ID
 export async function getProject(id: number): Promise<Project | null> {
   try {
-    const project = await prisma.project.findUnique({
+    const project = await prismaMaster.project.findUnique({
       where: { id },
     });
     return project;
   } catch (error) {
-    console.error('Failed to fetch project:', error);
-    throw new Error('Failed to fetch project');
+    console.error("Failed to fetch project:", error);
+    throw new Error("Failed to fetch project");
   }
 }
 
 // Server action to create a new project
 export async function createProject(formData: FormData) {
-  const name = formData.get('name') as string;
+  const name = formData.get("name") as string;
 
   if (!name?.trim()) {
-    throw new Error('Project name is required');
+    throw new Error("Project name is required");
   }
 
   try {
-    // Create Neon project
+    // 1. Create Neon project
     const { neonProjectId, databaseUrl } = await createNeonProject(name.trim());
 
-    // Store in master database with neonProjectId
-    const project = await prisma.project.create({
-      data: {
-        name: name.trim(),
-        databaseUrl,
-        neonProjectId, // Store the Neon project ID
+    // 2. Create Pinecone index (unique name per project)
+    const indexName = `project-${Date.now()}-${Math.floor(
+      Math.random() * 1000
+    )}`;
+
+    await pinecone.createIndex({
+      name: indexName,
+      dimension: 768, // depends on your embedding model
+      metric: "cosine",
+      spec: {
+        serverless: {
+          cloud: "aws",
+          region: "us-east-1",
+        },
       },
     });
 
-    // Initialize project database with User table
+    // 3. Store in master DB with pineconeIndex
+    const project = await prismaMaster.project.create({
+      data: {
+        name: name.trim(),
+        databaseUrl,
+        neonProjectId,
+        pineconeIndex: indexName,
+      },
+    });
+
+    // 4. Initialize Neon DB
     await initializeProjectDatabase(databaseUrl);
 
-    // Revalidate the dashboard page to show the new project
-    revalidatePath('/dashboard');
-    
+    // 5. Revalidate dashboard
+    revalidatePath("/dashboard");
+
     return { success: true, project };
   } catch (error) {
-    console.error('Project creation failed:', error);
-    throw new Error('Failed to create project');
+    console.error("Project creation failed:", error);
+    throw new Error("Failed to create project");
   }
 }
 
 // Server action to update a project
 export async function updateProject(id: number, data: { name: string }) {
   if (!data.name?.trim()) {
-    throw new Error('Project name is required');
+    throw new Error("Project name is required");
   }
 
   try {
     // First get the project to extract Neon project ID
-    const project = await prisma.project.findUnique({
+    const project = await prismaMaster.project.findUnique({
       where: { id },
     });
 
     if (!project) {
-      throw new Error('Project not found');
+      throw new Error("Project not found");
     }
 
     // Update the project name in Neon Console
     let neonProjectId: string;
-    
+
     if (project.neonProjectId) {
       // If we have the neonProjectId stored, use it directly
       neonProjectId = project.neonProjectId;
     } else {
       // Extract from database URL (fallback method)
-      neonProjectId = neonApiClient.extractProjectIdFromUrl(project.databaseUrl);
+      neonProjectId = neonApiClient.extractProjectIdFromUrl(
+        project.databaseUrl
+      );
     }
 
     // Update in Neon Console
-    await neonApiClient.updateProject(neonProjectId, { name: data.name.trim() });
+    await neonApiClient.updateProject(neonProjectId, {
+      name: data.name.trim(),
+    });
 
     // Update in local database
-    const updatedProject = await prisma.project.update({
+    const updatedProject = await prismaMaster.project.update({
       where: { id },
       data: { name: data.name.trim() },
     });
 
     // Revalidate the dashboard page
-    revalidatePath('/dashboard');
+    revalidatePath("/dashboard");
     revalidatePath(`/dashboard/projects/${id}`);
-    
+
     return { success: true, project: updatedProject };
   } catch (error) {
-    console.error('Project update failed:', error);
-    throw new Error(`Failed to update project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Project update failed:", error);
+    throw new Error(
+      `Failed to update project: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }
 
 // Server action to delete a project
 export async function deleteProject(id: number) {
   try {
-    // First get the project to extract Neon project ID
-    const project = await prisma.project.findUnique({
-      where: { id },
-    });
+    const project = await prismaMaster.project.findUnique({ where: { id } });
+    if (!project) throw new Error("Project not found");
 
-    if (!project) {
-      throw new Error('Project not found');
-    }
-
-    // Delete the project from Neon Console
+    // 1. Delete Neon project
     let neonProjectId: string;
-    
     if (project.neonProjectId) {
-      // If we have the neonProjectId stored, use it directly
       neonProjectId = project.neonProjectId;
     } else {
-      // Extract from database URL (fallback method)
-      neonProjectId = neonApiClient.extractProjectIdFromUrl(project.databaseUrl);
+      neonProjectId = neonApiClient.extractProjectIdFromUrl(
+        project.databaseUrl
+      );
     }
-
-    // Delete from Neon Console first
     await neonApiClient.deleteProject(neonProjectId);
 
-    // Delete from local database
-    await prisma.project.delete({
-      where: { id },
-    });
+    // 2. Delete Pinecone index if exists
+    if (project.pineconeIndex) {
+      try {
+        await pinecone.deleteIndex(project.pineconeIndex);
+      } catch (err) {
+        console.warn("Failed to delete Pinecone index:", err);
+      }
+    }
 
-    // Revalidate the dashboard page
-    revalidatePath('/dashboard');
-    
+    // 3. Delete from local DB
+    await prismaMaster.project.delete({ where: { id } });
+
+    // 4. Revalidate dashboard
+    revalidatePath("/dashboard");
+
     return { success: true };
   } catch (error) {
-    console.error('Project deletion failed:', error);
-    throw new Error(`Failed to delete project: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error("Project deletion failed:", error);
+    throw new Error(
+      `Failed to delete project: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }

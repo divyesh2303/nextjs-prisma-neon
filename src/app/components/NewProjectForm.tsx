@@ -1,9 +1,9 @@
-// components/FormBasedProjectForm.tsx
-'use client';
+// NewProjectForm.tsx
+"use client";
 
-import React, { useState, useTransition } from 'react';
-import { Plus } from 'lucide-react';
-import { createProject } from '@/app/actions/project-actions';
+import React, { useState, useTransition } from "react";
+import { Plus } from "lucide-react";
+import { createProject } from "@/app/actions/project-actions";
 
 const NewProjectForm: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -12,13 +12,15 @@ const NewProjectForm: React.FC = () => {
 
   const handleFormAction = async (formData: FormData) => {
     setError(null);
-  
+
     startTransition(async () => {
       try {
         await createProject(formData);
         setShowForm(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create project');
+        setError(
+          err instanceof Error ? err.message : "Failed to create project"
+        );
       }
     });
   };
@@ -44,7 +46,7 @@ const NewProjectForm: React.FC = () => {
             type="submit"
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
           >
-            {isPending ? 'Creating...' : 'Create'}
+            {isPending ? "Creating..." : "Create"}
           </button>
           <button
             type="button"
@@ -54,9 +56,7 @@ const NewProjectForm: React.FC = () => {
             Cancel
           </button>
         </form>
-        {error && (
-          <p className="text-red-500 text-sm">{error}</p>
-        )}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
     );
   }

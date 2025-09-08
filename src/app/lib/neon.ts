@@ -21,7 +21,7 @@ export async function createNeonProject(
 
     console.log("🚀 Creating Neon project:", name);
 
-    // Create project using Neon API with org_id
+    
     const response = await fetch("https://console.neon.tech/api/v2/projects", {
       method: "POST",
       headers: {
@@ -52,7 +52,7 @@ export async function createNeonProject(
     const project = data.project;
     const defaultEndpoint = data.endpoints?.[0];
     const defaultDatabase = data.databases?.[0];
-    const defaultRole = data.roles?.[0]; // This contains the database credentials
+    const defaultRole = data.roles?.[0];  
 
     if (!defaultEndpoint || !defaultDatabase || !defaultRole) {
       console.error("Missing required data from Neon response:", {
@@ -69,7 +69,7 @@ export async function createNeonProject(
     console.log(`   Database: ${defaultDatabase.name}`);
     console.log(`   Role: ${defaultRole.name}`);
 
-    // Construct the complete database URL with credentials
+    
     const databaseUrl = `postgresql://${defaultRole.name}:${defaultRole.password}@${defaultEndpoint.host}/${defaultDatabase.name}?sslmode=require`;
 
     console.log("🔗 Database URL constructed successfully");

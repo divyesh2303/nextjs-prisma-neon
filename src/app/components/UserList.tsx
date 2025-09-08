@@ -1,39 +1,49 @@
-// app/dashboard/projects/[id]/components/UserList.tsx
+// app/components/UserList.tsx
 "use client";
 
 import React, { useState, useTransition, useOptimistic } from "react";
 import { Plus, Edit2, Trash2, Save, X } from "lucide-react";
-import { createUser, updateUser, deleteUser } from "@/app/actions/user-actions";
-import type { User } from "@/types";
+import {
+  createGroup,
+  updateGroup,
+  deleteGroup,
+} from "@/app/actions/group-actions"; // ✅ updated path after folder rename
+import type { Group } from "@/types";
 import ClientDate from "./ClientDate";
 
 interface UserListProps {
   projectId: number;
-  initialUsers: User[];
+  initialUsers: Group[];
+  onSelectGroup?: (groupId: number) => void; // 👈 new
 }
 
 type OptimisticAction =
-  | { type: "add"; user: User }
-  | { type: "update"; userId: number; user: Partial<User> }
-  | { type: "delete"; userId: number };
+  | { type: "add"; group: Group }
+  | { type: "update"; groupId: number; group: Partial<Group> }
+  | { type: "delete"; groupId: number };
 
-export const UserList = ({ projectId, initialUsers }: UserListProps) => {
+export const UserList = ({
+  projectId,
+  initialUsers,
+  onSelectGroup,
+}: UserListProps) => {
   const [showUserForm, setShowUserForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [editingUser, setEditingUser] = useState<Group | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
   const [optimisticUsers, addOptimisticUser] = useOptimistic(
     initialUsers,
-    (state: User[], action: OptimisticAction) => {
+    (state: Group[], action: OptimisticAction) => {
       switch (action.type) {
         case "add":
-          return [action.user, ...state];
+          return [action.group, ...state];
         case "update":
-          return state.map((user) =>
-            user.id === action.userId ? { ...user, ...action.user } : user
+          return state.map((g) =>
+            g.id === action.groupId ? { ...g, ...action.group } : g
           );
         case "delete":
-          return state.filter((user) => user.id !== action.userId);
+          return state.filter((g) => g.id !== action.groupId);
         default:
           return state;
       }
@@ -42,77 +52,74 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
 
   const handleAddUser = async (formData: FormData) => {
     const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
 
-    if (!name?.trim() || !email?.trim()) {
-      setError("Name and email are required");
+    if (!name?.trim()) {
+      setError("Name is required");
       return;
     }
 
-    const optimisticUser: User = {
-      id: Date.now(),
+    const optimisticGroup: Group = {
+      id: Date.now(), // temporary
       name: name.trim(),
-      email: email.trim(),
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
     startTransition(() => {
-      addOptimisticUser({ type: "add", user: optimisticUser });
+      addOptimisticUser({ type: "add", group: optimisticGroup });
     });
 
-    const result = await createUser(projectId, formData);
+    const result = await createGroup(projectId, formData);
 
     if (result.success) {
       setShowUserForm(false);
       setError(null);
     } else {
-      setError(result.error || "Failed to create user");
+      setError(result.error || "Failed to create group");
     }
   };
 
-  const handleUpdateUser = async (userId: number, formData: FormData) => {
+  const handleUpdateUser = async (groupId: number, formData: FormData) => {
     const name = formData.get("name") as string;
-    const email = formData.get("email") as string;
 
-    if (!name?.trim() || !email?.trim()) {
-      setError("Name and email are required");
+    if (!name?.trim()) {
+      setError("Name is required");
       return;
     }
 
     startTransition(() => {
       addOptimisticUser({
         type: "update",
-        userId,
-        user: { name: name.trim(), email: email.trim() },
+        groupId,
+        group: { name: name.trim() },
       });
     });
 
-    const result = await updateUser(projectId, userId, formData);
+    const result = await updateGroup(projectId, groupId, formData);
 
     if (result.success) {
       setEditingUser(null);
       setError(null);
     } else {
-      setError(result.error || "Failed to update user");
+      setError(result.error || "Failed to update group");
     }
   };
 
-  const handleDeleteUser = async (userId: number) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+  const handleDeleteUser = async (groupId: number) => {
+    if (!confirm("Are you sure you want to delete this group?")) return;
 
     startTransition(() => {
-      addOptimisticUser({ type: "delete", userId });
+      addOptimisticUser({ type: "delete", groupId });
     });
 
-    const result = await deleteUser(projectId, userId);
+    const result = await deleteGroup(projectId, groupId);
     if (!result.success) {
-      setError(result.error || "Failed to delete user");
+      setError(result.error || "Failed to delete group");
     }
   };
 
-  const startEditingUser = (user: User) => {
-    setEditingUser({ ...user });
+  const startEditingUser = (group: Group) => {
+    setEditingUser({ ...group });
     setError(null);
   };
 
@@ -125,7 +132,6 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
     <div>
       {/* Header + Add button */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-gray-800">Users</h2>
         <button
           onClick={() => {
             setShowUserForm(!showUserForm);
@@ -134,7 +140,7 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
           className="flex items-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           disabled={isPending}
         >
-          <Plus className="w-4 h-4" /> Add User
+          <Plus className="w-4 h-4" /> Add Group
         </button>
       </div>
 
@@ -145,7 +151,7 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
         </div>
       )}
 
-      {/* Add user form */}
+      {/* Add group form */}
       {showUserForm && (
         <form
           action={handleAddUser}
@@ -160,14 +166,6 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
               className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               disabled={isPending}
             />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              required
-              className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              disabled={isPending}
-            />
           </div>
           <div className="mt-3 flex space-x-2">
             <button
@@ -175,7 +173,7 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
               disabled={isPending}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {isPending ? "Adding..." : "Add User"}
+              {isPending ? "Adding..." : "Add Group"}
             </button>
             <button
               type="button"
@@ -189,17 +187,20 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
         </form>
       )}
 
-      {/* User List */}
+      {/* Group List */}
       <div className="space-y-3">
         {optimisticUsers.length ? (
-          optimisticUsers.map((user) => (
+          optimisticUsers.map((group) => (
             <div
-              key={user.id}
-              className="p-4 bg-gray-50 rounded-lg border flex items-center justify-between"
+              key={group.id}
+              onClick={() => onSelectGroup?.(group.id)}  
+              className={`p-4 bg-gray-50 rounded-lg border flex items-center justify-between cursor-pointer hover:bg-blue-50 ${
+                editingUser?.id === group.id ? "ring-2 ring-blue-400" : ""
+              }`}
             >
-              {editingUser?.id === user.id ? (
+              {editingUser?.id === group.id ? (
                 <form
-                  action={(formData) => handleUpdateUser(user.id, formData)}
+                  action={(formData) => handleUpdateUser(group.id, formData)}
                   className="flex flex-col w-full gap-2"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -207,14 +208,6 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
                       type="text"
                       name="name"
                       defaultValue={editingUser.name}
-                      className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      required
-                      disabled={isPending}
-                    />
-                    <input
-                      type="email"
-                      name="email"
-                      defaultValue={editingUser.email}
                       className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
                       required
                       disabled={isPending}
@@ -243,24 +236,23 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
                 <>
                   <div>
                     <div className="text-md font-medium text-gray-800">
-                      {user.name}
+                      {group.name}
                     </div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
                   </div>
                   <div className="flex items-center gap-3">
                     <ClientDate
-                      date={user.createdAt}
+                      date={group.createdAt}
                       className="text-xs text-gray-400"
                     />
                     <button
-                      onClick={() => startEditingUser(user)}
+                      onClick={() => startEditingUser(group)}
                       className="text-blue-500 hover:bg-blue-50 p-1 rounded"
                       disabled={isPending}
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteUser(user.id)}
+                      onClick={() => handleDeleteUser(group.id)}
                       className="text-red-500 hover:bg-red-50 p-1 rounded"
                       disabled={isPending}
                     >
@@ -273,7 +265,7 @@ export const UserList = ({ projectId, initialUsers }: UserListProps) => {
           ))
         ) : (
           <div className="text-center py-8 text-gray-500">
-            No users yet. Add your first user!
+            No groups yet. Add your first one!
           </div>
         )}
       </div>

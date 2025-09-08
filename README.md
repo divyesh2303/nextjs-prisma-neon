@@ -15,55 +15,56 @@
 ```
 
 3. **Set up environment variables**
+
    ```bash
    mkdir .env
    ```
-   
+
    Download npm
+
    ```bash
    npm install
    ```
-   
+
    Fill in your environment variables:
+
    ```env
    # Database
    DATABASE_URL="your-main-database-url"
    PROJECT_DATABASE_URL="<do not add anything >"
-   
+
    # Neon API (for creating project databases)
    NEON_API_KEY="your-neon-api-key"
    NEON_ORG_ID="your-neon-ORG-id"
-    
 
 
- 
+
+
 
    ```
 
-3. **Set up the database**
+4. **Set up the database**
+
    ```bash
-   npx prisma generate
+   npx prisma generate --schema=prisma/schema.prisma
    npx prisma generate --schema=prisma-project/projectSchema.prisma
+
    ```
 
 ## 🛠️ Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| **Framework** | Next.js 15 (App Router) |
-| **Language** | TypeScript |
-| **Database** | Neon (PostgreSQL) |
-| **ORM** | Prisma |
-| **Styling** | Tailwind CSS |
-| **Icons** | Lucide React |
-| **Deployment** | Vercel (recommended) |
+| Category       | Technology              |
+| -------------- | ----------------------- |
+| **Framework**  | Next.js 15 (App Router) |
+| **Language**   | TypeScript              |
+| **Database**   | Neon (PostgreSQL)       |
+| **ORM**        | Prisma                  |
+| **Styling**    | Tailwind CSS            |
+| **Icons**      | Lucide React            |
+| **Deployment** | Vercel (recommended)    |
 
-## 📚 API Routes
+## Demo Quetion
 
-### Projects
-- `GET /api/projects` - List all projects
-- `POST /api/projects` - Create a new project 
-
-### Users
-- `GET /api/projects/[id]` - List users in a project
-- `POST /api/projects/[id]` - Add user to a project
+```
+how many task is remaining?
+```

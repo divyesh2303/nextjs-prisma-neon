@@ -1,22 +1,25 @@
-// app/lib/prisma.ts
-import { PrismaClient } from '@/lib/prisma-master';
-import { PrismaClient as ProjectPrisma } from '@/lib/prisma-project';
+// src/app/lib/prisma.ts
+import { PrismaClient as MasterPrismaClient } from "@/lib/prisma-master";
+import { PrismaClient as ProjectPrismaClient } from "@/lib/prisma-project";
 
-// Global declaration to prevent multiple instances in development
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-  projectClients: Map<string, ProjectPrisma> | undefined;
+  prismaMaster?: MasterPrismaClient;
+  projectClients?: Map<string, ProjectPrismaClient>;
 };
 
-// Master client
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+// --- Master DB Client (single instance) ---
+export const prismaMaster =
+  globalForPrisma.prismaMaster ?? new MasterPrismaClient();
 
-// Project clients cache
-const projectClientsCache = globalForPrisma.projectClients ?? new Map<string, ProjectPrisma>();
+// --- Project Clients Cache (multi-tenant) ---
+const projectClientsCache =
+  globalForPrisma.projectClients ?? new Map<string, ProjectPrismaClient>();
 
-export function getProjectPrismaClient(databaseUrl: string): ProjectPrisma {
+export function getProjectPrismaClient(
+  databaseUrl: string
+): ProjectPrismaClient {
   if (!projectClientsCache.has(databaseUrl)) {
-    const client = new ProjectPrisma({
+    const client = new ProjectPrismaClient({
       datasources: { db: { url: databaseUrl } },
     });
     projectClientsCache.set(databaseUrl, client);
@@ -24,8 +27,7 @@ export function getProjectPrismaClient(databaseUrl: string): ProjectPrisma {
   return projectClientsCache.get(databaseUrl)!;
 }
 
-// Store in global in development to prevent re-initialization
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prismaMaster = prismaMaster;
   globalForPrisma.projectClients = projectClientsCache;
 }
