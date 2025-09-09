@@ -51,3 +51,6 @@ lib/prisma-project/
 *.log
 *.tmp
 .cache/
+
+# Local Netlify folder
+.netlify

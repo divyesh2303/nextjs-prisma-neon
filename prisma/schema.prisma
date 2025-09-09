@@ -13,7 +13,7 @@ model Project {
   id            Int      @id @default(autoincrement())
   name          String
   databaseUrl   String
+  createdAt     DateTime @default(now())
   neonProjectId String
   pineconeIndex String?
-  createdAt     DateTime @default(now())
 }
