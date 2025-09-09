@@ -53,7 +53,7 @@ export async function createProject(formData: FormData) {
 
     await pinecone.createIndex({
       name: indexName,
-      dimension: 768, // depends on your embedding model
+      dimension: 768,  
       metric: "cosine",
       spec: {
         serverless: {
